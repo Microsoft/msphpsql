@@ -133,7 +133,7 @@ try {
     exit;
 }
 ?>
---EXPECT--
+--EXPECTF--
 
 array(8) {
   ["flags"]=>
@@ -145,7 +145,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(12) "此是後話"
   ["len"]=>
@@ -163,7 +163,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(29) "Κοντάוְאַתָּה第"
   ["len"]=>
@@ -181,7 +181,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(30) "NΚοντάוְאַתָּה第"
   ["len"]=>
@@ -199,7 +199,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(38) "ნომინავიiałopioБун"
   ["len"]=>
@@ -217,7 +217,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(10) "VarcharCol"
   ["len"]=>
@@ -235,7 +235,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(33) "NVarΚοντάוְאַתָּה第"
   ["len"]=>
@@ -253,7 +253,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(8) "FloatCol"
   ["len"]=>
@@ -269,7 +269,7 @@ array(7) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(6) "XmlCol"
   ["len"]=>

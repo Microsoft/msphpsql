@@ -28,16 +28,16 @@ try {
     var_dump($e);
 }
 ?>
---EXPECT--
+--EXPECTF--
 SQL: [79] SELECT IntCol FROM PDO_AllTypes WHERE BigIntCol = :bigint AND CharCol = :string
 Params:  2
 Key: Name: [7] :bigint
 paramno=0
 name=[7] ":bigint"
 is_param=1
-param_type=1
+param_type=%d
 Key: Name: [7] :string
 paramno=1
 name=[7] ":string"
 is_param=1
-param_type=2
+param_type=%d

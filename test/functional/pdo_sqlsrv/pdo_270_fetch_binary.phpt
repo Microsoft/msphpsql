@@ -50,7 +50,23 @@ try {
     var_dump($e->errorInfo);
 }
 
-    //calls various fetch methods
+function verifyBinaryResult($result, $input, $len, $message)
+{
+    if (PHP_VERSION_ID < 80100) {
+        if (strncmp($result, $input, $len) !== 0) {
+            print_r($message);
+        }
+    } else {
+        if (!feof($result)) {
+            $str = fread($result, $len);
+            if (strncmp($str, $input, $len) !== 0) {
+                print_r($message);
+            }
+        }
+    }
+}
+
+//calls various fetch methods
 function testFetch($conn, $tableName, $columnName, $input)
 {
     $len = strlen($input);
@@ -60,17 +76,13 @@ function testFetch($conn, $tableName, $columnName, $input)
     $stmt->bindColumn(1, $result, PDO::PARAM_LOB);
     $stmt->fetch(PDO::FETCH_BOUND);
     //binary is fixed size, to evaluate output, compare it using strncmp
-    if (strncmp($result, $input, $len) !== 0) {
-        print_r("\nRetrieving using bindColumn failed");
-    }
+    verifyBinaryResult($result, $input, $len, "\nRetrieving using bindColumn failed");
 
     $result = "";
     $stmt = $conn->query($sql);
     $stmt->bindColumn(1, $result, PDO::PARAM_LOB, 0, PDO::SQLSRV_ENCODING_BINARY);
     $stmt->fetch(PDO::FETCH_BOUND);
-    if (strncmp($result, $input, $len) !== 0) {
-        print_r("\nRetrieving using bindColumn with encoding set failed");
-    }
+    verifyBinaryResult($result, $input, $len, "\nRetrieving using bindColumn with encoding set failed");
 
     $result = "";
     $stmt = $conn->query($sql);

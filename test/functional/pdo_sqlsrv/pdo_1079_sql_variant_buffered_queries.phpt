@@ -38,7 +38,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   ["flags"]=>
   int(0)
@@ -49,7 +49,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(6) "RESULT"
   ["len"]=>

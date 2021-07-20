@@ -53,6 +53,10 @@ try {
                 // check the case when fetching as PDO::PARAM_STR or PDO::PARAM_LOB
                 // with or without AE: should work
                 } else {
+                    if (PHP_VERSION_ID >= 80100 && is_resource($c1)) {
+                        // Starting with PHP 8.1 fetching as PDO::PARAM_LOB will return a resource obj
+                        $c1 = fread($c1, 8192);
+                    }
                     if (strlen($c1) == $m) {
                         echo "****Retrieving $typeFull as $pdoParamType is supported****\n";
                     } else {

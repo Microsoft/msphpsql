@@ -23,20 +23,20 @@ $stmt->debugDumpParams();
 $stmt=null;
 $conn=null;
 ?>
---EXPECT--
-SQL: [52] select * from Person.ContactType where name = :param
+--EXPECTREGEX--
+SQL: \[52\] select \* from Person.ContactType where name = \:param
 Params:  1
-Key: Name: [6] :param
+Key: Name: \[6\] :param
 paramno=0
-name=[6] ":param"
+name=\[6\] ":param"
 is_param=1
-param_type=2
+param_type=(2|3)
 
 
-SQL: [47] select * from Person.ContactType where name = ?
+SQL: \[47\] select \* from Person.ContactType where name = \?
 Params:  1
 Key: Position #0:
 paramno=0
-name=[0] ""
+name=\[0\] ""
 is_param=1
-param_type=2
+param_type=(2|3)

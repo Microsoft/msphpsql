@@ -135,7 +135,12 @@ function runTest($conn, $query, $columns, $values, $useBuffer = false)
     // Setting it to true only converts numeric values to strings when fetching
     // See http://www.php.net/manual/en/pdo.setattribute.php for details
     // stringify on, fetch_numeric off, fetch_datetime on
-    $conn->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+    if (PHP_VERSION_ID < 80100) {
+        // TODO: starting in PHP 8.1 with ATTR_STRINGIFY_FETCHES set to true
+        // this fails with this error from PHP:
+        // Fatal error: Uncaught Error: Object of class DateTime could not be converted to string
+        $conn->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+    }
     $conn->setAttribute(PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE, false);
     $conn->setAttribute(PDO::SQLSRV_ATTR_FETCHES_DATETIME_TYPE, true);
     $stmt = $conn->prepare($query, $options);
@@ -253,11 +258,7 @@ try {
 
     $query = "INSERT INTO $tableName VALUES(?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-
-    // Bind the first param using the PHP DateTime object
-    $today = date_create($values[0]);
-    $stmt->bindParam(1, $today, PDO::PARAM_LOB);
-    for ($i = 1; $i < count($columns); $i++) {
+    for ($i = 0; $i < count($columns); $i++) {
         $stmt->bindParam($i+1, $values[$i], PDO::PARAM_LOB);
     }
     $stmt->execute();

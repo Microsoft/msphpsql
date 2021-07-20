@@ -45,9 +45,23 @@ try {
 
     $stmt->bindColumn(2, $value, PDO::PARAM_LOB, 0, PDO::SQLSRV_ENCODING_SYSTEM);
     $result = $stmt->fetch(PDO::FETCH_BOUND);
-    if (!$result || $value !== $input[1]) {
-        echo "Expected $input[1] but got: ";
-        var_dump($result);
+    if (PHP_VERSION_ID < 80100) {
+        if (!$result || $value !== $input[1]) {
+            echo "Expected $input[1] but got: ";
+            var_dump($value);
+        }
+    } else {
+        if (!$result || !is_resource($value)) {
+            echo "Expected a stream resource but got: ";
+            var_dump($value);
+        }
+        if (!feof($value)) {
+            $str = fread($value, strlen($input[1]));
+            if ($str !== $input[1]) {
+                echo "Expected $input[1] but got: ";
+                var_dump($str);
+            }
+        }
     }
 
     $stmt->bindColumn(2, $value, PDO::PARAM_STR);

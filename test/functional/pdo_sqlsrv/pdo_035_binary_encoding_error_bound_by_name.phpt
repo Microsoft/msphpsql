@@ -28,9 +28,18 @@ try {
     $stmt = $conn->prepare("SELECT Value FROM $tableName"); 
     $stmt->bindColumn('Value', $val1, PDO::PARAM_LOB, 0, PDO::SQLSRV_ENCODING_BINARY);  
     $stmt->execute();
-    $stmt->fetch(PDO::FETCH_BOUND);  
-    var_dump($val1 === $value);
-        
+    $stmt->fetch(PDO::FETCH_BOUND);
+    
+    if (PHP_VERSION_ID < 80100) {
+        var_dump($val1 === $value);
+    } else {
+        // $val1 is a stream object
+        if (!feof($val1)) {
+            $str = fread($val1, 8192);
+            var_dump($str === $value);
+        }
+    }
+
     // Close connection
     dropTable($conn, $tableName);
     unset($stmt);

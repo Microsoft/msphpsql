@@ -61,8 +61,14 @@ function fetchLob($offset, $conn, $table, $sqlType, $data1, $data2)
     if ($id != $data1) {
         logInfo($offset, "ID data corruption: [$id] instead of [$data1]");
     }
-    if ($label != $data2) {
-        logInfo($offset, "Label data corruption: [$label] instead of [$data2]");
+    if (PHP_VERSION_ID < 80100) {
+        if ($label != $data2) {
+            logInfo($offset, "Label data corruption: [$label] instead of [$data2]");
+        }
+    } else {
+        if (!compareResourceToInput($label, $data2)) {
+            logInfo($offset, "Label data corruption");
+        }
     }
     unset($stmt);
     unset($label);

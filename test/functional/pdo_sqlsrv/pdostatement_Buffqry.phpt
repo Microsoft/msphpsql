@@ -111,8 +111,10 @@ function bindPARAM_NULL($db, $tbname)
     $query = "UPDATE PDO_AllTypes SET [BitCol]=:Name WHERE [VarcharCol]=:value";
 
     $stmt = $db->prepare($query, array(PDO::ATTR_CURSOR=>PDO::CURSOR_SCROLL, PDO::SQLSRV_ATTR_CURSOR_SCROLL_TYPE=>PDO::SQLSRV_CURSOR_BUFFERED));
-    fwrite($noteID, null);
-    rewind($noteID);
+    // PHP Deprecated:  fwrite(): Passing null to parameter #2 ($data) of type string is deprecated
+    // Also, it is not necessary for this test
+    // fwrite($noteID, null);
+    // rewind($noteID);
     $stmt->bindParam(':Name', $noteID, PDO::PARAM_NULL);
     $stmt->bindParam(':value', $data);
     $stmt->execute();

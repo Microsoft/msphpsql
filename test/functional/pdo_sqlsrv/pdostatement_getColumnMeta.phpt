@@ -94,7 +94,7 @@ try {
 
 
 ?>
---EXPECT--
+--EXPECTF--
 
 array(8) {
   ["flags"]=>
@@ -106,7 +106,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(6) "IntCol"
   ["len"]=>
@@ -124,7 +124,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(7) "CharCol"
   ["len"]=>
@@ -142,7 +142,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(8) "NCharCol"
   ["len"]=>
@@ -160,7 +160,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(11) "DateTimeCol"
   ["len"]=>
@@ -178,7 +178,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(10) "VarcharCol"
   ["len"]=>
@@ -196,7 +196,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(11) "NVarCharCol"
   ["len"]=>
@@ -214,7 +214,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(8) "FloatCol"
   ["len"]=>
@@ -230,7 +230,7 @@ array(7) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(6) "XmlCol"
   ["len"]=>

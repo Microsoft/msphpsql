@@ -6,7 +6,7 @@ prepare with emulate prepare and binding uft8 characters
 <?php
 require_once('MsCommon_mid-refactor.inc');
 
-function prepareStmt($conn, $query, $prepareOptions = array(), $dataType = null, $length = null, $driverOptions = null)
+function prepareStmt($conn, $query, $prepareOptions = array(), $dataType = PDO::PARAM_STR, $length = 0, $driverOptions = null)
 {
     $name = "가각";
     if (!isColEncrypted()) {

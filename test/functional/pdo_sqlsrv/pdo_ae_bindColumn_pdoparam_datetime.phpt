@@ -47,6 +47,11 @@ try {
             // only check if input values are part of fetched values because some input values do not contain any deicmal places, the value retrieved however has 3 decimal places if the type is a datetime
             // with or without AE: should work
             } else {
+                if (PHP_VERSION_ID >= 80100 && $pdoParamType == "PDO::PARAM_LOB") {
+                    // Starting with PHP 8.1 fetching as PDO::PARAM_LOB will return a resource obj
+                    $det = fread($det, 8192);
+                    $rand = fread($rand, 8192);
+                }
                 if (strpos($det, $inputValues[0]) !== false && strpos($rand, $inputValues[1]) !== false) {
                     echo "****Retrieving $dataType as $pdoParamType is supported****\n";
                 } else {

@@ -185,7 +185,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 SQLSTATE[IMSSP]: The given attribute is only supported on the PDOStatement object.
 SQLSTATE[IMSSP]: An invalid attribute was designated on the PDOStatement object.
 Start inserting data...
@@ -271,7 +271,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(6) "Budget"
   ["len"]=>

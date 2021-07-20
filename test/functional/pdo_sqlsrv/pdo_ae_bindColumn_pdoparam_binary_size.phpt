@@ -52,9 +52,15 @@ try {
                     if (!is_null($det) || !is_null($rand)) {
                         echo "Retrieving $typeFull data as $pdoParamType should not be supported\n";
                     }
-                // check the case when fetching as PDO::PARAM_STR or PDO::PARAM_LOB
+                // check the case when fetching as PDO::PARAM_STR
                 // with or without AE: should work
                 } else {
+                    if (PHP_VERSION_ID >= 80100 && $pdoParamType == "PDO::PARAM_LOB") {
+                        // Starting with PHP 8.1 fetching as PDO::PARAM_LOB will return a resource obj
+                        $det = fread($det, 8192);
+                        $rand = fread($rand, 8192);
+                    }
+                    
                     if (trim($det) == $inputValues[0] && trim($rand) == $inputValues[1]) {
                         echo "****Retrieving $typeFull data as $pdoParamType is supported****\n";
                     } else {

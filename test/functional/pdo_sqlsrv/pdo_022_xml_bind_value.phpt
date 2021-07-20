@@ -42,7 +42,7 @@ try {
 }
 
 // Get data
-$row = selectAll($conn, $tableName, "PDO::FETCH_ASSOC");
+$row = selectAll($conn, $tableName, PDO::FETCH_ASSOC);
 var_dump($row);
 
 // Close connection

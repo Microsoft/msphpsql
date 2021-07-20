@@ -278,8 +278,13 @@ int pdo_sqlsrv_stmt_fetch( _Inout_ pdo_stmt_t *stmt, _In_ enum pdo_fetch_orienta
 int pdo_sqlsrv_stmt_param_hook( _Inout_ pdo_stmt_t *stmt,
                                _Inout_ struct pdo_bound_param_data *param, _In_ enum pdo_param_event event_type );
 int pdo_sqlsrv_stmt_describe_col( _Inout_ pdo_stmt_t *stmt, _In_ int colno );
+#if PHP_VERSION_ID < 80100
 int pdo_sqlsrv_stmt_get_col_data( _Inout_ pdo_stmt_t *stmt, _In_ int colno,
                                  _Out_writes_bytes_opt_(*len) char **ptr, _Inout_ size_t *len, _Out_opt_ int *caller_frees );
+#else
+int pdo_sqlsrv_stmt_get_col_data(_Inout_ pdo_stmt_t *stmt, _In_ int colno, _Inout_ zval *result, _Inout_ enum pdo_param_type *type);
+#endif
+
 int pdo_sqlsrv_stmt_set_attr( _Inout_ pdo_stmt_t *stmt, _In_ zend_long attr, _Inout_ zval *val );
 int pdo_sqlsrv_stmt_get_attr( _Inout_ pdo_stmt_t *stmt, _In_ zend_long attr, _Inout_ zval *return_value );
 int pdo_sqlsrv_stmt_get_col_meta( _Inout_ pdo_stmt_t *stmt, _In_ zend_long colno, _Inout_ zval *return_value );
@@ -453,9 +458,10 @@ int pdo_sqlsrv_stmt_describe_col( _Inout_ pdo_stmt_t *stmt, _In_ int colno)
     // Set the precision
     column_data->precision = core_meta_data->field_scale;
 
+#if PHP_VERSION_ID < 80100
     // Set the param_type    
     column_data->param_type = PDO_PARAM_ZVAL; 
-    
+#endif    
     // store the field data for use by pdo_sqlsrv_stmt_get_col_data
     pdo_sqlsrv_stmt* driver_stmt = reinterpret_cast<pdo_sqlsrv_stmt*>( stmt->driver_data );
     SQLSRV_ASSERT( driver_stmt != NULL, "Invalid driver statement in pdo_sqlsrv_stmt_describe_col" );
@@ -551,8 +557,13 @@ int pdo_sqlsrv_stmt_execute( _Inout_ pdo_stmt_t *stmt )
 
             zend_hash_internal_pointer_reset(driver_stmt->placeholders);
 
+#if PHP_VERSION_ID < 80100
             query = stmt->active_query_string;
             query_len = static_cast<unsigned int>(stmt->active_query_stringlen);
+#else
+            query = ZSTR_VAL(stmt->active_query_string);
+            query_len = ZSTR_LEN(stmt->active_query_string);
+#endif
         }
 
         // The query timeout setting is inherited from the corresponding connection attribute, but
@@ -652,14 +663,23 @@ int pdo_sqlsrv_stmt_fetch( _Inout_ pdo_stmt_t *stmt, _In_ enum pdo_fetch_orienta
             pdo_bound_param_data* bind_data = NULL;
 
             if( !driver_stmt->bound_column_param_types ) {
-                driver_stmt->bound_column_param_types = 
+#if PHP_VERSION_ID < 80100
+                driver_stmt->bound_column_param_types =
                     reinterpret_cast<pdo_param_type*>( sqlsrv_malloc( stmt->column_count, sizeof( pdo_param_type ), 0 ));
                 std::fill( driver_stmt->bound_column_param_types, driver_stmt->bound_column_param_types + stmt->column_count,
                            PDO_PARAM_ZVAL );
+#else
+                // TODO: possibly no longer need bound_column_param_types?? default to PDO_PARAM_STR???
+                driver_stmt->bound_column_param_types =
+                    reinterpret_cast<pdo_param_type*>(sqlsrv_malloc(stmt->column_count, sizeof(pdo_param_type), 0));
+                std::fill(driver_stmt->bound_column_param_types, driver_stmt->bound_column_param_types + stmt->column_count,
+                    PDO_PARAM_STR);
+#endif
             }
 
             for( long i = 0; i < stmt->column_count; ++i ) {
              
+#if PHP_VERSION_ID < 80100
                 if (NULL== (bind_data = reinterpret_cast<pdo_bound_param_data*>(zend_hash_index_find_ptr(stmt->bound_columns, i))) &&
                     (NULL == (bind_data = reinterpret_cast<pdo_bound_param_data*>(zend_hash_find_ptr(stmt->bound_columns, stmt->columns[i].name))))) {
 
@@ -672,6 +692,15 @@ int pdo_sqlsrv_stmt_fetch( _Inout_ pdo_stmt_t *stmt, _In_ enum pdo_fetch_orienta
                     driver_stmt->bound_column_param_types[i] = bind_data->param_type;
                     bind_data->param_type = PDO_PARAM_ZVAL;
                 }
+#else
+                if (NULL == (bind_data = reinterpret_cast<pdo_bound_param_data*>(zend_hash_index_find_ptr(stmt->bound_columns, i))) &&
+                    (NULL == (bind_data = reinterpret_cast<pdo_bound_param_data*>(zend_hash_find_ptr(stmt->bound_columns, stmt->columns[i].name))))) {
+                    continue;
+                }
+
+                // TODO: possibly no longer need bound_column_param_types??
+                driver_stmt->bound_column_param_types[i] = bind_data->param_type;
+#endif
             }
         }
 
@@ -730,8 +759,13 @@ int pdo_sqlsrv_stmt_fetch( _Inout_ pdo_stmt_t *stmt, _In_ enum pdo_fetch_orienta
 //                freeing the memory.
 // Return:
 // 0 for failure, 1 for success.
+#if PHP_VERSION_ID < 80100
 int pdo_sqlsrv_stmt_get_col_data( _Inout_ pdo_stmt_t *stmt, _In_ int colno,
                                  _Out_writes_bytes_opt_(*len) char **ptr, _Inout_ size_t *len, _Out_opt_ int *caller_frees)
+#else
+int pdo_sqlsrv_stmt_get_col_data(_Inout_ pdo_stmt_t *stmt, _In_ int colno, _Inout_ zval *result_z, _Inout_ enum pdo_param_type *type)
+#endif
+
 {
     PDO_RESET_STMT_ERROR;
     PDO_VALIDATE_STMT;
@@ -739,39 +773,44 @@ int pdo_sqlsrv_stmt_get_col_data( _Inout_ pdo_stmt_t *stmt, _In_ int colno,
    
     try {
 
-        SQLSRV_ASSERT( stmt != NULL, "pdo_sqlsrv_stmt_get_col_data: pdo_stmt object was null" );
+        SQLSRV_ASSERT(stmt != NULL, "pdo_sqlsrv_stmt_get_col_data: pdo_stmt object was null");
 
-        pdo_sqlsrv_stmt* driver_stmt = reinterpret_cast<pdo_sqlsrv_stmt*>( stmt->driver_data );
-        
-        SQLSRV_ASSERT( driver_stmt != NULL, "pdo_sqlsrv_stmt_get_col_data: driver_data object was null" );
+        pdo_sqlsrv_stmt* driver_stmt = reinterpret_cast<pdo_sqlsrv_stmt*>(stmt->driver_data);
 
-        CHECK_CUSTOM_ERROR((colno < 0), driver_stmt, PDO_SQLSRV_ERROR_INVALID_COLUMN_INDEX ) {
+        SQLSRV_ASSERT(driver_stmt != NULL, "pdo_sqlsrv_stmt_get_col_data: driver_data object was null");
+
+        CHECK_CUSTOM_ERROR((colno < 0), driver_stmt, PDO_SQLSRV_ERROR_INVALID_COLUMN_INDEX) {
             return 0;
         }
-        
+
+#if PHP_VERSION_ID < 80100
         // Let PDO free the memory after use. 
-        *caller_frees = 1;
-        
+        * caller_frees = 1;
+#endif
+
         // translate the pdo type to a type the core layer understands
         sqlsrv_phptype sqlsrv_php_type;
-        SQLSRV_ASSERT( colno >= 0 && colno < static_cast<int>( driver_stmt->current_meta_data.size()),
-                       "Invalid column number in pdo_sqlsrv_stmt_get_col_data" );
+        SQLSRV_ASSERT(colno >= 0 && colno < static_cast<int>(driver_stmt->current_meta_data.size()),
+            "Invalid column number in pdo_sqlsrv_stmt_get_col_data");
 
         // set the encoding if the user specified one via bindColumn, otherwise use the statement's encoding
         // save the php type for next use
         sqlsrv_php_type = driver_stmt->sql_type_to_php_type(
-                            static_cast<SQLINTEGER>(driver_stmt->current_meta_data[colno]->field_type),
-                            static_cast<SQLUINTEGER>(driver_stmt->current_meta_data[colno]->field_size),
-                            true);
+            static_cast<SQLINTEGER>(driver_stmt->current_meta_data[colno]->field_type),
+            static_cast<SQLUINTEGER>(driver_stmt->current_meta_data[colno]->field_size),
+            true);
         driver_stmt->current_meta_data[colno]->sqlsrv_php_type = sqlsrv_php_type;
 
         // if a column is bound to a type different than the column type, figure out a way to convert it to the 
         // type they want
-        if( stmt->bound_columns && driver_stmt->bound_column_param_types[colno] != PDO_PARAM_ZVAL ) {
-
-            sqlsrv_php_type.typeinfo.type = pdo_type_to_sqlsrv_php_type( driver_stmt, 
-                                                                         driver_stmt->bound_column_param_types[colno] 
-                                                                         );
+#if PHP_VERSION_ID < 80100
+        if (stmt->bound_columns && driver_stmt->bound_column_param_types[colno] != PDO_PARAM_ZVAL) {
+#else
+        if (stmt->bound_columns) {
+#endif
+            sqlsrv_php_type.typeinfo.type = pdo_type_to_sqlsrv_php_type(driver_stmt,
+                driver_stmt->bound_column_param_types[colno]
+            );
 
             pdo_bound_param_data* bind_data = NULL;
             bind_data = reinterpret_cast<pdo_bound_param_data*>(zend_hash_index_find_ptr(stmt->bound_columns, colno));
@@ -780,40 +819,41 @@ int pdo_sqlsrv_stmt_get_col_data( _Inout_ pdo_stmt_t *stmt, _In_ int colno,
                 bind_data = reinterpret_cast<pdo_bound_param_data*>(zend_hash_find_ptr(stmt->bound_columns, stmt->columns[colno].name));
             }
 
-            if( bind_data != NULL && !Z_ISUNDEF(bind_data->driver_params) ) {
+            if (bind_data != NULL && !Z_ISUNDEF(bind_data->driver_params)) {
 
-                CHECK_CUSTOM_ERROR( Z_TYPE( bind_data->driver_params ) != IS_LONG, driver_stmt, 
-                                    PDO_SQLSRV_ERROR_INVALID_COLUMN_DRIVER_DATA, colno + 1 ) {
+                CHECK_CUSTOM_ERROR(Z_TYPE(bind_data->driver_params) != IS_LONG, driver_stmt,
+                    PDO_SQLSRV_ERROR_INVALID_COLUMN_DRIVER_DATA, colno + 1) {
                     throw pdo::PDOException();
                 }
 
-                CHECK_CUSTOM_ERROR( driver_stmt->bound_column_param_types[colno] != PDO_PARAM_STR 
-                                    && driver_stmt->bound_column_param_types[colno] != PDO_PARAM_LOB, driver_stmt,
-                                    PDO_SQLSRV_ERROR_COLUMN_TYPE_DOES_NOT_SUPPORT_ENCODING, colno + 1 ) {
+                CHECK_CUSTOM_ERROR(driver_stmt->bound_column_param_types[colno] != PDO_PARAM_STR
+                    && driver_stmt->bound_column_param_types[colno] != PDO_PARAM_LOB, driver_stmt,
+                    PDO_SQLSRV_ERROR_COLUMN_TYPE_DOES_NOT_SUPPORT_ENCODING, colno + 1) {
 
-                        throw pdo::PDOException();
+                    throw pdo::PDOException();
                 }
 
-                sqlsrv_php_type.typeinfo.encoding = Z_LVAL( bind_data->driver_params );
+                sqlsrv_php_type.typeinfo.encoding = Z_LVAL(bind_data->driver_params);
 
-                switch( sqlsrv_php_type.typeinfo.encoding ) {
-                    case SQLSRV_ENCODING_SYSTEM:
-                    case SQLSRV_ENCODING_BINARY:
-                    case SQLSRV_ENCODING_UTF8:
-                        break;
-                    default:
-                        THROW_PDO_ERROR( driver_stmt, PDO_SQLSRV_ERROR_INVALID_DRIVER_COLUMN_ENCODING, colno );
-                        break;
+                switch (sqlsrv_php_type.typeinfo.encoding) {
+                case SQLSRV_ENCODING_SYSTEM:
+                case SQLSRV_ENCODING_BINARY:
+                case SQLSRV_ENCODING_UTF8:
+                    break;
+                default:
+                    THROW_PDO_ERROR(driver_stmt, PDO_SQLSRV_ERROR_INVALID_DRIVER_COLUMN_ENCODING, colno);
+                    break;
                 }
             }
 
             // save the php type for the bound column
             driver_stmt->current_meta_data[colno]->sqlsrv_php_type = sqlsrv_php_type;
         }
-        
+
         SQLSRV_PHPTYPE sqlsrv_phptype_out = SQLSRV_PHPTYPE_INVALID;
-        core_sqlsrv_get_field( driver_stmt, colno, sqlsrv_php_type, false, *(reinterpret_cast<void**>(ptr)),
-                               reinterpret_cast<SQLLEN*>( len ), true, &sqlsrv_phptype_out );
+#if PHP_VERSION_ID < 80100
+        core_sqlsrv_get_field(driver_stmt, colno, sqlsrv_php_type, false, *(reinterpret_cast<void**>(ptr)),
+            reinterpret_cast<SQLLEN*>(len), true, &sqlsrv_phptype_out);
 
         if (ptr) {
             zval* zval_ptr = reinterpret_cast<zval*>(sqlsrv_malloc(sizeof(zval)));
@@ -821,7 +861,14 @@ int pdo_sqlsrv_stmt_get_col_data( _Inout_ pdo_stmt_t *stmt, _In_ int colno,
             *ptr = reinterpret_cast<char*>(zval_ptr);
             *len = sizeof(zval);
         }
-
+#else
+        SQLLEN len = 0;
+        void *ptr = NULL;
+        core_sqlsrv_get_field(driver_stmt, colno, sqlsrv_php_type, false, ptr, &len, true, &sqlsrv_phptype_out);
+        if (ptr) {
+            *result_z = convert_to_zval(driver_stmt, sqlsrv_phptype_out, &ptr, len);
+        }
+#endif
         return 1;
     }   
     catch ( core::CoreException& ) {
@@ -1114,9 +1161,15 @@ int pdo_sqlsrv_stmt_get_col_meta( _Inout_ pdo_stmt_t *stmt, _In_ zend_long colno
                                &out_buff_len, &field_type_num );
         add_assoc_string( return_value, "table", table_name );
 
+#if PHP_VERSION_ID < 80100
         if( stmt->columns && stmt->columns[colno].param_type == PDO_PARAM_ZVAL ) {
             add_assoc_long( return_value, "pdo_type", pdo_type );
         }
+#else
+        if (stmt->columns) {
+            add_assoc_long(return_value, "pdo_type", pdo_type);
+        }
+#endif
     }
     catch( core::CoreException& ) {
         zval_ptr_dtor(return_value);

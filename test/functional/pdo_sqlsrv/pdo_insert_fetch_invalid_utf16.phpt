@@ -26,7 +26,7 @@ try {
 
     $insertSql = "INSERT INTO $tableName (c1) VALUES (?)";
     $stmt = $conn->prepare($insertSql);
-    $stmt->bindParam(1, $invalidUTF16, PDO::PARAM_STR, null, PDO::SQLSRV_ENCODING_BINARY);
+    $stmt->bindParam(1, $invalidUTF16, PDO::PARAM_STR, 0, PDO::SQLSRV_ENCODING_BINARY);
     $stmt->execute();
     
     try {

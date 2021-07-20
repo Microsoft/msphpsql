@@ -48,27 +48,41 @@ try {
                 }
             // check the case when fetching as PDO::PARAM_BOOL or PDO::PARAM_INT
             // with or without AE: should only not work with bigint
-            } else if ($pdoParamType == "PDO::PARAM_BOOL" || $pdoParamType == "PDO::PARAM_INT") {
+            } elseif ($pdoParamType == "PDO::PARAM_BOOL" || $pdoParamType == "PDO::PARAM_INT") {
                 if ($dataType == "bigint") {
                     if (!is_null($det) || !is_null($rand)) {
                         echo "Retrieving $dataType data as $pdoParamType should not be supported\n";
                     }
-                } else if ($dataType == "real") {
-                    if (abs($det - $inputValues[0]) < $epsilon && abs($rand - $inputValues[1]) < $epsilon) {
+                } elseif (PHP_VERSION_ID >= 80100 && $pdoParamType == "PDO::PARAM_BOOL") {
+                    if ($det == boolval($inputValues[0]) && $rand == boolval($inputValues[1])) {
                         echo "****Retrieving $dataType as $pdoParamType is supported****\n";
                     } else {
                         echo "Retrieving $dataType as $pdoParamType fails\n";
                     }
                 } else {
-                    if ($det == $inputValues[0] && $rand == $inputValues[1]) {
-                        echo "****Retrieving $dataType as $pdoParamType is supported****\n";
+                    if ($dataType == "real") {
+                        if (abs($det - $inputValues[0]) < $epsilon && abs($rand - $inputValues[1]) < $epsilon) {
+                            echo "****Retrieving $dataType as $pdoParamType is supported****\n";
+                        } else {
+                            echo "Retrieving $dataType as $pdoParamType fails\n";
+                        }
                     } else {
-                        echo "Retrieving $dataType as $pdoParamType fails\n";
+                        if ($det == $inputValues[0] && $rand == $inputValues[1]) {
+                            echo "****Retrieving $dataType as $pdoParamType is supported****\n";
+                        } else {
+                            echo "Retrieving $dataType as $pdoParamType fails\n";
+                        }
                     }
                 }
             // check the case when fetching as PDO::PARAM_BOOL, PDO::PARAM_INT, PDO::PARAM_STR or PDO::PARAM_LOB
             // with or without AE: should work
             } else {
+                if ($pdoParamType == "PDO::PARAM_LOB") {
+                    if (PHP_VERSION_ID >= 80100) {
+                        $det = fread($det, 8192);
+                        $rand = fread($rand, 8192);
+                    }
+                }
                 if ($dataType == "real") {
                     if (abs($det - $inputValues[0]) < $epsilon && abs($rand - $inputValues[1]) < $epsilon) {
                         echo "****Retrieving $dataType as $pdoParamType is supported****\n";

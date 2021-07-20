@@ -114,6 +114,11 @@ try {
                             $succeeded = compareIntegers($pdoParamType, $det, $rand, $inputValues, $m1, $m2);
                         }
                     } else {
+                        if (PHP_VERSION_ID >= 80100 && $pdoParamType == "PDO::PARAM_LOB") {
+                            // Starting with PHP 8.1 fetching as PDO::PARAM_LOB will return a resource obj
+                            $det = fread($det, 8192);
+                            $rand = fread($rand, 8192);
+                        }
                         if (abs($det - $inputValues[0]) < $epsilon &&
                             abs($rand - $inputValues[1]) < $epsilon) {
                             $succeeded = true;

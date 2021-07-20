@@ -81,7 +81,7 @@ function Repro()
 Repro();
 
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   ["flags"]=>
   int(0)
@@ -92,7 +92,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(2) "id"
   ["len"]=>
@@ -110,7 +110,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(3) "val"
   ["len"]=>
@@ -128,7 +128,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(4) "val2"
   ["len"]=>
@@ -146,7 +146,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(0) ""
   ["len"]=>

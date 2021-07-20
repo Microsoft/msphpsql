@@ -19,24 +19,24 @@ print $metadata['name'];
 $stmt = null;
 $conn = null;
 ?>
---EXPECT--
-array(8) {
-  ["flags"]=>
-  int(0)
-  ["sqlsrv:decl_type"]=>
-  string(8) "datetime"
-  ["native_type"]=>
-  string(6) "string"
-  ["table"]=>
-  string(0) ""
-  ["pdo_type"]=>
-  int(2)
-  ["name"]=>
-  string(12) "ModifiedDate"
-  ["len"]=>
-  int(23)
-  ["precision"]=>
-  int(3)
+--EXPECTREGEX--
+array\(8\) {
+  \["flags"\]=>
+  int\(0\)
+  \["sqlsrv:decl_type"\]=>
+  string\(8\) "datetime"
+  \["native_type"\]=>
+  string\(6\) "string"
+  \["table"\]=>
+  string\(0\) ""
+  \["pdo_type"\]=>
+  int\((2|3)\)
+  \["name"\]=>
+  string\(12\) "ModifiedDate"
+  \["len"\]=>
+  int\(23\)
+  \["precision"\]=>
+  int\(3\)
 }
 datetime
 string

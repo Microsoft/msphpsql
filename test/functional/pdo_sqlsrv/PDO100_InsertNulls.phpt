@@ -65,7 +65,7 @@ function insertNullsTest($bindType)
                 $stmt2->setAttribute(PDO::SQLSRV_ATTR_ENCODING, PDO::SQLSRV_ENCODING_BINARY);
                 $stmt2->bindValue(":p1", null, $bindType);
             } elseif ($bindType == PDO::PARAM_STR) {
-                $stmt2->bindParam(":p1", $outvar, $bindType, null, PDO::SQLSRV_ENCODING_BINARY);
+                $stmt2->bindParam(":p1", $outvar, $bindType, 0, PDO::SQLSRV_ENCODING_BINARY);
             }
         } else {
             $stmt2->bindParam(":p1", $outvar);

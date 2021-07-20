@@ -57,7 +57,12 @@ try {
     // Start testing quote function
     $conn->setAttribute(PDO::ATTR_DEFAULT_STR_PARAM, PDO::PARAM_STR_CHAR);
     
-    var_dump($conn->quote(null, PDO::PARAM_NULL));
+    // Deprecated: PDO::quote(): Passing null to parameter #1 ($string) of type string is being deprecated
+    if (PHP_VERSION_ID < 80100) {
+        var_dump($conn->quote(null, PDO::PARAM_NULL));
+    } else {
+        var_dump($conn->quote('', PDO::PARAM_NULL));
+    }
     var_dump($conn->quote('\'', PDO::PARAM_STR));
     var_dump($conn->quote('foo', PDO::PARAM_STR));
     var_dump($conn->quote('foo', PDO::PARAM_STR | PDO::PARAM_STR_CHAR));

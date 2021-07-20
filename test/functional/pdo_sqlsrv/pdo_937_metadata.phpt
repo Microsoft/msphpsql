@@ -79,7 +79,7 @@ unset($stmt);
 unset($conn);
 
 ?>
---EXPECT--
+--EXPECTF--
 Number of columns after UPDATE: 0
 array(8) {
   ["flags"]=>
@@ -91,7 +91,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(2) "id"
   ["len"]=>
@@ -109,7 +109,7 @@ array(8) {
   ["table"]=>
   string(0) ""
   ["pdo_type"]=>
-  int(2)
+  int(%d)
   ["name"]=>
   string(4) "name"
   ["len"]=>
